@@ -4,9 +4,11 @@
  */
 
 const response = require('../utils/response');
+const logger = require('../utils/logger');
 
 const errorHandler = (err, req, res, next) => {
-    console.error('Error:', err);
+    // Log error with Winston
+    logger.logError(err, req);
 
     // Mongoose validation error
     if (err.name === 'ValidationError') {

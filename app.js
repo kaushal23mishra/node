@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
 dotenv.config();
 global.__basedir = __dirname;
 
@@ -9,20 +12,55 @@ const postmanToOpenApi = require('postman-to-openapi');
 const YAML = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
 const listEndpoints = require('express-list-endpoints');
-const logger = require('morgan');
+const morgan = require('morgan');
 const passport = require('passport');
+const logger = require('./utils/logger');
 
 const { adminPassportStrategy, errorHandler } = require('./middleware');
 const { devicePassportStrategy } = require('./middleware');
 const { clientPassportStrategy } = require('./middleware');
 
 const app = express();
+
+// Security: Helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://dxuoui1db8w1y.cloudfront.net"],
+      scriptSrc: ["'self'"],
+    },
+  },
+}));
+
+// Security: Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting to all routes
+app.use(limiter);
+
+// CORS
 const corsOptions = { origin: process.env.ALLOW_ORIGIN };
 app.use(cors(corsOptions));
 
 // Template engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Health check routes (before authentication)
+const healthCheckController = require('./controller/common/healthCheck');
+app.get('/health', healthCheckController.healthCheck);
+app.get('/health/detailed', healthCheckController.detailedHealthCheck);
+app.get('/health/ready', healthCheckController.readinessCheck);
+app.get('/health/live', healthCheckController.livenessCheck);
 
 // All routes 
 const routes = require('./routes');
@@ -33,9 +71,10 @@ devicePassportStrategy(passport);
 clientPassportStrategy(passport);
 
 // Middleware
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// HTTP request logging with Winston
+app.use(morgan('combined', { stream: logger.stream }));
+app.use(express.json({ limit: '10mb' })); // Add size limit
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(routes);
 

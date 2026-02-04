@@ -23,6 +23,7 @@
     "express-rate-limit": "^7.5.0",
     "extract-zip": "^2.0.1",
     "formidable": "^2.1.5",
+    "helmet": "^8.1.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^6.13.8",
@@ -37,6 +38,8 @@
     "swagger-ui-express": "^5.0.1",
     "uuid": "^8.3.2",
     "valid-url": "^1.0.9",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
