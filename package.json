@@ -1,0 +1,53 @@
+{
+  "name": "kaushal-s-application5",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "jest --runInBand --verbose --detectOpenHandles",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1693.0",
+    "axios": "^0.21.4",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
+    "dayjs": "^1.11.19",
+    "debug": "^4.4.3",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.22.1",
+    "express-list-endpoints": "^7.1.1",
+    "express-rate-limit": "^7.5.0",
+    "extract-zip": "^2.0.1",
+    "formidable": "^2.1.5",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^6.13.8",
+    "mongoose-id-validator": "^0.6.0",
+    "mongoose-paginate-v2": "^1.9.1",
+    "mongoose-unique-validator": "^3.1.0",
+    "morgan": "^1.10.1",
+    "nodemailer": "^6.9.16",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "postman-to-openapi": "^2.2.1",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^8.3.2",
+    "valid-url": "^1.0.9",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-plugin-import": "^2.32.0",
+    "jest": "^27.5.1",
+    "nodemon": "^3.1.11",
+    "supertest": "^6.3.4"
+  },
+  "description": "**Supported version of nodejs >= 12**, **Supported version of mongoose >= 6**",
+  "main": ".eslintrc.js",
+  "author": "",
+  "license": "ISC"
+}
