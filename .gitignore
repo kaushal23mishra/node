@@ -39,7 +39,6 @@ build/
 # Misc
 .dhiwise
 .git.zip
-.gemini/
 
 # Temporary files
 tmp/
