@@ -7,6 +7,8 @@ const response = require('../../utils/response');
 const { sendMail } = require('../../services/email');
 const { sendSMS } = require('../../services/sms');
 
+const logger = require('../../utils/logger');
+
 const sendResetPasswordNotification = ({ userDb }) => async (user) => {
   let resultOfEmail = false;
   let resultOfSMS = false;
@@ -15,16 +17,16 @@ const sendResetPasswordNotification = ({ userDb }) => async (user) => {
   expires = expires.add(FORGOT_PASSWORD_WITH.EXPIRE_TIME, 'minute').toISOString();
   await userDb.updateOne(
     {
-      _id :user.id,
-      isActive : true,
-      isDeleted : false,      
+      _id: user.id,
+      isActive: true,
+      isDeleted: false,
     }, {
-      resetPasswordLink: {
-        code: token,
-        expireTime: expires 
-      } 
-    });
-  if (FORGOT_PASSWORD_WITH.LINK.email){
+    resetPasswordLink: {
+      code: token,
+      expireTime: expires
+    }
+  });
+  if (FORGOT_PASSWORD_WITH.LINK.email) {
 
     let mailObj = {
       subject: 'Reset Password',
@@ -41,29 +43,29 @@ const sendResetPasswordNotification = ({ userDb }) => async (user) => {
       await sendMail(mailObj);
       resultOfEmail = true;
     } catch (error) {
-      console.log(error);
+      logger.error('Error sending reset password email', { error: error.message, userId: user.id });
     }
   }
-  if (FORGOT_PASSWORD_WITH.LINK.sms){
+  if (FORGOT_PASSWORD_WITH.LINK.sms) {
     let viewType = '/reset-password/';
     let link = `http://localhost:${process.env.PORT}${viewType + token}`;
-    const msg = await ejs.renderFile(`${__basedir}/views/sms/ResetPassword/html.ejs`, { link : link });
+    const msg = await ejs.renderFile(`${__basedir}/views/sms/ResetPassword/html.ejs`, { link: link });
     let smsObj = {
-      to:user.mobileNo,
-      message:msg
+      to: user.mobileNo,
+      message: msg
     };
     try {
       await sendSMS(smsObj);
       resultOfSMS = true;
-    } catch (error){
-      console.log(error);
+    } catch (error) {
+      logger.error('Error sending reset password SMS', { error: error.message, userId: user.id });
     }
   }
   return response.success({
-    data :{
+    data: {
       resultOfEmail,
-      resultOfSMS 
-    } 
+      resultOfSMS
+    }
   });
 };
 module.exports = sendResetPasswordNotification;

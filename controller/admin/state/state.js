@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: State
+ *   description: State management for admin platform
+ */
+
+/**
+ * @openapi
+ * /admin/state/list:
+ *   post:
+ *     tags: [State]
+ *     summary: Get all states with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/state/create:
+ *   post:
+ *     tags: [State]
+ *     summary: Create a new state
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../utils/response'); 
 const responseHandler = require('../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../utils/getSelectObject'); 

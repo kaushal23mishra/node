@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Pincode
+ *   description: Pincode management for device platform
+ */
+
+/**
+ * @openapi
+ * /device/pincode/list:
+ *   post:
+ *     tags: [Pincode]
+ *     summary: Get all pincodes with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /device/pincode/create:
+ *   post:
+ *     tags: [Pincode]
+ *     summary: Create a new pincode
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../../utils/response'); 
 const responseHandler = require('../../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../../utils/getSelectObject'); 

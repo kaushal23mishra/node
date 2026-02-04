@@ -5,23 +5,24 @@
 
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
+const config = require('../config');
 
 let transporter = nodemailer.createTransport({
   service: 'Mailgun',
   auth: {
-    user: process.env.MAILGUN_USER,
-    pass: process.env.MAILGUN_PASSWORD
+    user: config.email.user,
+    pass: config.email.password
   }
 });
 
-const sendMail =  async (obj) => {
-    
+const sendMail = async (obj) => {
+
   if (!Array.isArray(obj.to)) {
     obj.to = [obj.to];
   }
 
   let htmlText = '';
-  if (obj.template){
+  if (obj.template) {
     htmlText = await ejs.renderFile(`${__basedir}${obj.template}/html.ejs`, obj.data || null);
   }
 

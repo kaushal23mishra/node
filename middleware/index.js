@@ -21,6 +21,7 @@ const adminPassportStrategy = require('./adminPassportStrategy')({ userDb });
 const devicePassportStrategy = require('./devicePassportStrategy')({ userDb });
 const clientPassportStrategy = require('./clientPassportStrategy')({ userDb });
 const errorHandler = require('./errorHandler');
+const apiVersion = require('./apiVersion');
 
 module.exports = {
   auth,
@@ -29,4 +30,5 @@ module.exports = {
   devicePassportStrategy,
   clientPassportStrategy,
   errorHandler,
+  apiVersion,
 };

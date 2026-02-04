@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Country
+ *   description: Country management for admin platform
+ */
+
+/**
+ * @openapi
+ * /admin/country/list:
+ *   post:
+ *     tags: [Country]
+ *     summary: Get all countrys with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/country/create:
+ *   post:
+ *     tags: [Country]
+ *     summary: Create a new country
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../utils/response'); 
 const responseHandler = require('../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../utils/getSelectObject'); 

@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Projectroute
+ *   description: Projectroute management for admin platform
+ */
+
+/**
+ * @openapi
+ * /admin/projectRoute/list:
+ *   post:
+ *     tags: [Projectroute]
+ *     summary: Get all projectroutes with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/projectRoute/create:
+ *   post:
+ *     tags: [Projectroute]
+ *     summary: Create a new projectroute
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../utils/response'); 
 const responseHandler = require('../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../utils/getSelectObject'); 

@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Banner
+ *   description: Banner management for admin platform
+ */
+
+/**
+ * @openapi
+ * /admin/banner/list:
+ *   post:
+ *     tags: [Banner]
+ *     summary: Get all banners with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/banner/create:
+ *   post:
+ *     tags: [Banner]
+ *     summary: Create a new banner
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../utils/response'); 
 const responseHandler = require('../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../utils/getSelectObject'); 

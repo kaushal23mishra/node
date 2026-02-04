@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Userrole
+ *   description: Userrole management for admin platform
+ */
+
+/**
+ * @openapi
+ * /admin/userRole/list:
+ *   post:
+ *     tags: [Userrole]
+ *     summary: Get all userroles with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/userRole/create:
+ *   post:
+ *     tags: [Userrole]
+ *     summary: Create a new userrole
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../utils/response'); 
 const responseHandler = require('../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../utils/getSelectObject'); 

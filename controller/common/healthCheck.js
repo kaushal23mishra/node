@@ -5,119 +5,132 @@
 
 const mongoose = require('mongoose');
 const os = require('os');
+const asyncHandler = require('../../utils/asyncHandler');
+const { AppError } = require('../../utils/AppError');
+const ERROR_CODES = require('../../constants/errorCodes');
 
 /**
- * @route GET /health
- * @description Basic health check
+ * @openapi
+ * /health:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: Basic health check
+ *     description: Returns the status of the application and basic environment info.
+ *     responses:
+ *       200:
+ *         description: Application is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 timestamp:
+ *                   type: string
+ *                 uptime:
+ *                   type: number
+ *       503:
+ *         description: Application is unhealthy
  */
-const healthCheck = async (req, res) => {
-    try {
-        const healthData = {
-            status: 'OK',
-            timestamp: new Date().toISOString(),
-            uptime: process.uptime(),
-            environment: process.env.NODE_ENV || 'development',
-            version: require('../../package.json').version,
-        };
+const healthCheck = asyncHandler(async (req, res) => {
+    const healthData = {
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development',
+        version: require('../../package.json').version,
+    };
 
-        res.status(200).json(healthData);
-    } catch (error) {
-        res.status(503).json({
-            status: 'ERROR',
-            message: error.message
-        });
-    }
-};
+    res.status(200).json(healthData);
+});
 
 /**
  * @route GET /health/detailed
- * @description Detailed health check with system metrics
+ * @description Detailed health check with system metrics and database connectivity
  */
-const detailedHealthCheck = async (req, res) => {
+const detailedHealthCheck = asyncHandler(async (req, res) => {
+    // 1. Check database connection & latency
+    const startDb = Date.now();
+    let dbStatus = 'connected';
+    let dbLatency = 0;
+
     try {
-        // Check database connection
-        const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-
-        // Get memory usage
-        const memoryUsage = process.memoryUsage();
-        const totalMemory = os.totalmem();
-        const freeMemory = os.freemem();
-
-        // Get CPU usage
-        const cpuUsage = process.cpuUsage();
-
-        const healthData = {
-            status: dbStatus === 'connected' ? 'OK' : 'DEGRADED',
-            timestamp: new Date().toISOString(),
-            checks: {
-                database: {
-                    status: dbStatus,
-                    type: 'MongoDB',
-                    responseTime: null // Can add ping time if needed
-                },
-                memory: {
-                    used: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
-                    total: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
-                    systemTotal: `${Math.round(totalMemory / 1024 / 1024)}MB`,
-                    systemFree: `${Math.round(freeMemory / 1024 / 1024)}MB`,
-                    percentage: `${Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100)}%`
-                },
-                cpu: {
-                    user: cpuUsage.user,
-                    system: cpuUsage.system,
-                    cores: os.cpus().length
-                },
-                system: {
-                    platform: os.platform(),
-                    arch: os.arch(),
-                    nodeVersion: process.version,
-                    uptime: `${Math.floor(process.uptime())}s`,
-                    loadAverage: os.loadavg()
-                }
-            },
-            environment: process.env.NODE_ENV || 'development',
-            version: require('../../package.json').version
-        };
-
-        const statusCode = healthData.status === 'OK' ? 200 : 503;
-        res.status(statusCode).json(healthData);
+        if (mongoose.connection.readyState !== 1) {
+            dbStatus = 'disconnected';
+        } else {
+            // Real ping to database
+            await mongoose.connection.db.admin().ping();
+            dbLatency = Date.now() - startDb;
+        }
     } catch (error) {
-        res.status(503).json({
-            status: 'ERROR',
-            message: error.message,
-            timestamp: new Date().toISOString()
-        });
+        dbStatus = 'error';
     }
-};
+
+    // 2. System Metrics
+    const memoryUsage = process.memoryUsage();
+    const cpuUsage = process.cpuUsage();
+    const systemUptime = os.uptime();
+    const processUptime = process.uptime();
+
+    const healthData = {
+        status: dbStatus === 'connected' ? 'OK' : 'DEGRADED',
+        timestamp: new Date().toISOString(),
+        uptime: processUptime,
+        checks: {
+            database: {
+                status: dbStatus,
+                type: 'MongoDB',
+                responseTime: `${dbLatency}ms`
+            },
+            memory: {
+                rss: `${Math.round(memoryUsage.rss / 1024 / 1024)}MB`,
+                heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
+                heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
+                external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`,
+            },
+            cpu: {
+                user: cpuUsage.user,
+                system: cpuUsage.system
+            },
+            system: {
+                platform: os.platform(),
+                arch: os.arch(),
+                totalMemory: `${Math.round(os.totalmem() / 1024 / 1024)}MB`,
+                freeMemory: `${Math.round(os.freemem() / 1024 / 1024)}MB`,
+                loadAverage: os.loadavg(),
+                uptime: `${Math.floor(systemUptime)}s`
+            }
+        },
+        environment: process.env.NODE_ENV || 'development',
+        version: require('../../package.json').version
+    };
+
+    if (dbStatus !== 'connected') {
+        throw new AppError('Detailed health check failed: Database not reachable', 503, ERROR_CODES.DB_CONNECTION_ERROR);
+    }
+
+    res.status(200).json(healthData);
+});
 
 /**
  * @route GET /health/ready
  * @description Readiness probe for Kubernetes/Docker
  */
-const readinessCheck = async (req, res) => {
-    try {
-        // Check if database is ready
-        const dbReady = mongoose.connection.readyState === 1;
+const readinessCheck = asyncHandler(async (req, res) => {
+    const dbReady = mongoose.connection.readyState === 1;
 
-        if (dbReady) {
-            res.status(200).json({
-                status: 'READY',
-                timestamp: new Date().toISOString()
-            });
-        } else {
-            res.status(503).json({
-                status: 'NOT_READY',
-                reason: 'Database not connected',
-                timestamp: new Date().toISOString()
-            });
-        }
-    } catch (error) {
-        res.status(503).json({
-            status: 'ERROR',
-            message: error.message
-        });
+    if (!dbReady) {
+        throw new AppError('Database not connected', 503, ERROR_CODES.DB_CONNECTION_ERROR);
     }
-};
+
+    res.status(200).json({
+        status: 'READY',
+        timestamp: new Date().toISOString()
+    });
+});
 
 /**
  * @route GET /health/live

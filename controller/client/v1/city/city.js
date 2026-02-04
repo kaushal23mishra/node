@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: City
+ *   description: City management for client platform
+ */
+
+/**
+ * @openapi
+ * /client/city/list:
+ *   post:
+ *     tags: [City]
+ *     summary: Get all citys with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /client/city/create:
+ *   post:
+ *     tags: [City]
+ *     summary: Create a new city
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../../utils/response'); 
 const responseHandler = require('../../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../../utils/getSelectObject'); 

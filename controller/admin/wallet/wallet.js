@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Wallet
+ *   description: Wallet management for admin platform
+ */
+
+/**
+ * @openapi
+ * /admin/wallet/list:
+ *   post:
+ *     tags: [Wallet]
+ *     summary: Get all wallets with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/wallet/create:
+ *   post:
+ *     tags: [Wallet]
+ *     summary: Create a new wallet
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../utils/response'); 
 const responseHandler = require('../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../utils/getSelectObject'); 

@@ -1,80 +1,120 @@
-const response = require('../../../utils/response'); 
-const responseHandler = require('../../../utils/response/responseHandler'); 
-const getSelectObject = require('../../../utils/getSelectObject'); 
+/**
+ * @openapi
+ * tags:
+ *   name: Category
+ *   description: Category management for admin platform
+ */
 
-const addCategory = (addCategoryUsecase) => async (req,res) => {
+/**
+ * @openapi
+ * /admin/category/list:
+ *   post:
+ *     tags: [Category]
+ *     summary: Get all categories with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/category/create:
+ *   post:
+ *     tags: [Category]
+ *     summary: Create a new category
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name: { type: string }
+ *               description: { type: string }
+ *     responses:
+ *       200: { description: Category created }
+ */
+const response = require('../../../utils/response');
+const responseHandler = require('../../../utils/response/responseHandler');
+const getSelectObject = require('../../../utils/getSelectObject');
+
+const addCategory = (addCategoryUsecase) => async (req, res) => {
   try {
     let dataToCreate = { ...req.body || {} };
     dataToCreate.addedBy = req.user.id;
-    let result = await addCategoryUsecase(dataToCreate,req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+    let result = await addCategoryUsecase(dataToCreate, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const bulkInsertCategory = (bulkInsertCategoryUsecase)=> async (req,res) => {
+const bulkInsertCategory = (bulkInsertCategoryUsecase) => async (req, res) => {
   try {
     let dataToCreate = [...req.body.data];
-    for (let i = 0;i < dataToCreate.length;i++){
+    for (let i = 0; i < dataToCreate.length; i++) {
       dataToCreate[i] = {
         ...dataToCreate[i],
-        addedBy:req.user.id,
+        addedBy: req.user.id,
       };
     }
-    let result = await bulkInsertCategoryUsecase(dataToCreate,req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+    let result = await bulkInsertCategoryUsecase(dataToCreate, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const findAllCategory = (findAllCategoryUsecase) => async (req,res) => {
+const findAllCategory = (findAllCategoryUsecase) => async (req, res) => {
   try {
     let query = { ...req.body.query || {} };
     let options = { ...req.body.options || {} };
     let result = await findAllCategoryUsecase({
       query,
       options,
-      isCountOnly:req.body.isCountOnly || false
-    },req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+      isCountOnly: req.body.isCountOnly || false
+    }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const getCategory = (getCategoryUsecase) => async (req,res) =>{
+const getCategory = (getCategoryUsecase) => async (req, res) => {
   try {
-    if (!req.params.id){
-      return responseHandler(res,response.badRequest());
+    if (!req.params.id) {
+      return responseHandler(res, response.badRequest());
     }
     let query = { _id: req.params.id };
     let options = {};
     let result = await getCategoryUsecase({
       query,
       options
-    },req,res);
-    return responseHandler(res,result);
+    }, req, res);
+    return responseHandler(res, result);
   } catch (error) {
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const getCategoryCount = (getCategoryCountUsecase) => async (req,res) => {
+const getCategoryCount = (getCategoryCountUsecase) => async (req, res) => {
   try {
     let where = { ...req.body.where || {} };
-    let result = await getCategoryCountUsecase({ where },req,res);  
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+    let result = await getCategoryCountUsecase({ where }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const updateCategory = (updateCategoryUsecase) => async (req,res) =>{
+const updateCategory = (updateCategoryUsecase) => async (req, res) => {
   try {
-    if (!req.params.id){
-      return responseHandler(res,response.badRequest({ message : 'Insufficient request parameters! id is required.' }));
+    if (!req.params.id) {
+      return responseHandler(res, response.badRequest({ message: 'Insufficient request parameters! id is required.' }));
     }
     let dataToUpdate = { ...req.body || {} };
     let query = { _id: req.params.id };
@@ -83,14 +123,14 @@ const updateCategory = (updateCategoryUsecase) => async (req,res) =>{
     let result = await updateCategoryUsecase({
       dataToUpdate,
       query
-    },req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+    }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const bulkUpdateCategory = (bulkUpdateCategoryUsecase) => async (req,res) => {
+const bulkUpdateCategory = (bulkUpdateCategoryUsecase) => async (req, res) => {
   try {
     let dataToUpdate = { ...req.body.data || {} };
     let query = { ...req.body.filter || {} };
@@ -99,17 +139,17 @@ const bulkUpdateCategory = (bulkUpdateCategoryUsecase) => async (req,res) => {
     let result = await bulkUpdateCategoryUsecase({
       dataToUpdate,
       query
-    },req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+    }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const partialUpdateCategory = (partialUpdateCategoryUsecase) => async (req,res) => {
+const partialUpdateCategory = (partialUpdateCategoryUsecase) => async (req, res) => {
   try {
-    if (!req.params.id){
-      return responseHandler(res,response.badRequest({ message : 'Insufficient request parameters! id is required.' }));
+    if (!req.params.id) {
+      return responseHandler(res, response.badRequest({ message: 'Insufficient request parameters! id is required.' }));
     }
     let query = { _id: req.params.id };
     let dataToUpdate = { ...req.body || {} };
@@ -117,17 +157,17 @@ const partialUpdateCategory = (partialUpdateCategoryUsecase) => async (req,res) 
     let result = await partialUpdateCategoryUsecase({
       dataToUpdate,
       query
-    },req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+    }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const softDeleteCategory = (softDeleteCategoryUsecase) => async (req,res) => {
+const softDeleteCategory = (softDeleteCategoryUsecase) => async (req, res) => {
   try {
-    if (!req.params.id){
-      return responseHandler(res,response.badRequest({ message : 'Insufficient request parameters! id is required.' }));
+    if (!req.params.id) {
+      return responseHandler(res, response.badRequest({ message: 'Insufficient request parameters! id is required.' }));
     }
     let query = { _id: req.params.id };
     const dataToUpdate = {
@@ -137,54 +177,54 @@ const softDeleteCategory = (softDeleteCategoryUsecase) => async (req,res) => {
     let result = await softDeleteCategoryUsecase({
       query,
       dataToUpdate,
-      isWarning:req.body.isWarning || false
-    },req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+      isWarning: req.body.isWarning || false
+    }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const deleteCategory = (deleteCategoryUsecase) => async (req,res) => {
+const deleteCategory = (deleteCategoryUsecase) => async (req, res) => {
   try {
-    if (!req.params.id){
-      return responseHandler(res,response.badRequest({ message : 'Insufficient request parameters! id is required.' }));
+    if (!req.params.id) {
+      return responseHandler(res, response.badRequest({ message: 'Insufficient request parameters! id is required.' }));
     }
     let query = { _id: req.params.id };
     let result = await deleteCategoryUsecase({
       query,
-      isWarning:req.body.isWarning || false
-    },req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+      isWarning: req.body.isWarning || false
+    }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const deleteManyCategory = (deleteManyCategoryUsecase) => async (req,res) => {
+const deleteManyCategory = (deleteManyCategoryUsecase) => async (req, res) => {
   try {
-    if (!req.body || !req.body.ids){
-      return responseHandler(res,response.badRequest({ message : 'Insufficient request parameters! ids field is required.' }));
+    if (!req.body || !req.body.ids) {
+      return responseHandler(res, response.badRequest({ message: 'Insufficient request parameters! ids field is required.' }));
     }
     let ids = req.body.ids;
-    let query = { _id : { $in:ids } };
+    let query = { _id: { $in: ids } };
     let result = await deleteManyCategoryUsecase({
       query,
-      isWarning:req.body.isWarning || false
-    },req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+      isWarning: req.body.isWarning || false
+    }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 
-const softDeleteManyCategory = (softDeleteManyCategoryUsecase) => async (req,res) => {
+const softDeleteManyCategory = (softDeleteManyCategoryUsecase) => async (req, res) => {
   try {
-    if (!req.body || !req.body.ids){
-      return responseHandler(res,response.badRequest({ message : 'Insufficient request parameters! id is required.' }));
+    if (!req.body || !req.body.ids) {
+      return responseHandler(res, response.badRequest({ message: 'Insufficient request parameters! id is required.' }));
     }
     let ids = req.body.ids;
-    let query = { _id : { $in:ids } };
+    let query = { _id: { $in: ids } };
     const dataToUpdate = {
       isDeleted: true,
       updatedBy: req.user.id,
@@ -192,11 +232,11 @@ const softDeleteManyCategory = (softDeleteManyCategoryUsecase) => async (req,res
     let result = await softDeleteManyCategoryUsecase({
       query,
       dataToUpdate,
-      isWarning:req.body.isWarning || false
-    },req,res);
-    return responseHandler(res,result);
-  } catch (error){
-    return responseHandler(res,response.internalServerError({ message:error.message }));
+      isWarning: req.body.isWarning || false
+    }, req, res);
+    return responseHandler(res, result);
+  } catch (error) {
+    return responseHandler(res, response.internalServerError({ message: error.message }));
   }
 };
 

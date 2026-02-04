@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Role
+ *   description: Role management for admin platform
+ */
+
+/**
+ * @openapi
+ * /admin/role/list:
+ *   post:
+ *     tags: [Role]
+ *     summary: Get all roles with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/role/create:
+ *   post:
+ *     tags: [Role]
+ *     summary: Create a new role
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../utils/response'); 
 const responseHandler = require('../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../utils/getSelectObject'); 

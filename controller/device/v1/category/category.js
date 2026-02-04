@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Category
+ *   description: Category management for device platform
+ */
+
+/**
+ * @openapi
+ * /device/category/list:
+ *   post:
+ *     tags: [Category]
+ *     summary: Get all categorys with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /device/category/create:
+ *   post:
+ *     tags: [Category]
+ *     summary: Create a new category
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../../utils/response'); 
 const responseHandler = require('../../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../../utils/getSelectObject'); 

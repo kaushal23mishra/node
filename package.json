@@ -1,18 +1,35 @@
 {
-  "name": "kaushal-s-application5",
+  "name": "node_dhi",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "jest --runInBand --verbose --detectOpenHandles",
+    "test": "jest --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --runInBand --ci",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check-all": "npm run lint && npm run format:check && npm test",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,json,md}": [
+      "prettier --write"
+    ],
+    "*.js": [
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "aws-sdk": "^2.1693.0",
     "axios": "^0.21.4",
     "bcrypt": "^5.1.1",
+    "bullmq": "^5.67.2",
+    "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dayjs": "^1.11.19",
     "debug": "^4.4.3",
@@ -20,10 +37,13 @@
     "ejs": "^3.1.10",
     "express": "^4.22.1",
     "express-list-endpoints": "^7.1.1",
+    "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.5.0",
     "extract-zip": "^2.0.1",
     "formidable": "^2.1.5",
     "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "ioredis": "^5.9.2",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^6.13.8",
@@ -31,21 +51,29 @@
     "mongoose-paginate-v2": "^1.9.1",
     "mongoose-unique-validator": "^3.1.0",
     "morgan": "^1.10.1",
+    "node-cache": "^5.1.2",
     "nodemailer": "^6.9.16",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "postman-to-openapi": "^2.2.1",
+    "prom-client": "^15.1.3",
+    "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^8.3.2",
     "valid-url": "^1.0.9",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
+    "xss-clean": "^0.1.4",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
     "jest": "^27.5.1",
+    "lint-staged": "^16.2.7",
+    "mongodb-memory-server": "^11.0.1",
+    "node-mocks-http": "^1.17.2",
     "nodemon": "^3.1.11",
     "supertest": "^6.3.4"
   },

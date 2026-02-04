@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Routerole
+ *   description: Routerole management for admin platform
+ */
+
+/**
+ * @openapi
+ * /admin/routeRole/list:
+ *   post:
+ *     tags: [Routerole]
+ *     summary: Get all routeroles with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /admin/routeRole/create:
+ *   post:
+ *     tags: [Routerole]
+ *     summary: Create a new routerole
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../utils/response'); 
 const responseHandler = require('../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../utils/getSelectObject'); 

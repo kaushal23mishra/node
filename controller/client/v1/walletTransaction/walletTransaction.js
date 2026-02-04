@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Wallettransaction
+ *   description: Wallettransaction management for client platform
+ */
+
+/**
+ * @openapi
+ * /client/walletTransaction/list:
+ *   post:
+ *     tags: [Wallettransaction]
+ *     summary: Get all wallettransactions with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /client/walletTransaction/create:
+ *   post:
+ *     tags: [Wallettransaction]
+ *     summary: Create a new wallettransaction
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../../utils/response'); 
 const responseHandler = require('../../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../../utils/getSelectObject'); 

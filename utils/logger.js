@@ -6,9 +6,23 @@
 const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
 const path = require('path');
+const { AsyncLocalStorage } = require('async_hooks');
+
+// Create storage for request context
+const asyncLocalStorage = new AsyncLocalStorage();
+
+// Format to inject correlation ID
+const injectRequestId = winston.format((info) => {
+    const store = asyncLocalStorage.getStore();
+    if (store && store.get('requestId')) {
+        info.requestId = store.get('requestId');
+    }
+    return info;
+});
 
 // Define log format
 const logFormat = winston.format.combine(
+    injectRequestId(),
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.errors({ stack: true }),
     winston.format.splat(),
@@ -19,8 +33,11 @@ const logFormat = winston.format.combine(
 const consoleFormat = winston.format.combine(
     winston.format.colorize(),
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.printf(({ timestamp, level, message, ...meta }) => {
-        let msg = `${timestamp} [${level}]: ${message}`;
+    winston.format.printf(({ timestamp, level, message, requestId, ...meta }) => {
+        let msg = `${timestamp} [${level}]`;
+        if (requestId) msg += ` [${requestId}]`;
+        msg += `: ${message}`;
+
         if (Object.keys(meta).length > 0) {
             msg += ` ${JSON.stringify(meta)}`;
         }
@@ -30,6 +47,10 @@ const consoleFormat = winston.format.combine(
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '../logs');
+const fs = require('fs');
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+}
 
 // Daily rotate file transport for errors
 const errorFileTransport = new DailyRotateFile({
@@ -159,4 +180,6 @@ logger.logAuth = (action, userId, success, details = {}) => {
     });
 };
 
+// Export logger instance and context store
+logger.context = asyncLocalStorage;
 module.exports = logger;

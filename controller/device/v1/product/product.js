@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * tags:
+ *   name: Product
+ *   description: Product management for device platform
+ */
+
+/**
+ * @openapi
+ * /device/product/list:
+ *   post:
+ *     tags: [Product]
+ *     summary: Get all products with pagination and filters
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Success }
+ */
+
+/**
+ * @openapi
+ * /device/product/create:
+ *   post:
+ *     tags: [Product]
+ *     summary: Create a new product
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: Created }
+ */
+
 const response = require('../../../../utils/response'); 
 const responseHandler = require('../../../../utils/response/responseHandler'); 
 const getSelectObject = require('../../../../utils/getSelectObject'); 

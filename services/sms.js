@@ -1,6 +1,10 @@
 const axios = require('axios');
+const logger = require('../utils/logger');
+const config = require('../config');
+
 const sendSMS = async (obj) => {
-  console.log('SMS---', obj);
+  logger.info('Initiating SMS sending', { to: obj.to || obj.mobiles });
+
   if (obj.to) {
     obj.mobiles = obj.to;
   }
@@ -16,33 +20,38 @@ const sendSMS = async (obj) => {
     let tmpNo = obj.mobiles.split('+');
     mobiles = tmpNo[1] ? tmpNo[1] : tmpNo[0];
   }
+
   const message = obj.message;
-  const userid = '';
-  const password = escape('yourPassword');
+  const userid = config.sms.userId;
+  const password = config.sms.password;
   const v = 1.1;
   const method = 'sendMessage';
   const msg_type = 'text';
   const send_to = mobiles;
-  return await new Promise((resolve, reject) => {
-    axios(
-      {
-        url: `http://enterprise.smsgupshup.com/GatewayAPI/rest?msg=${message}&v=${v}&userid=${userid}&password=${password}&method=${method}&send_to=${send_to}&msg_type=${msg_type}`,
-        method: 'GET',
-      })
-      .then(function (response) {
-        let response1 = response.data.split('|');
-        console.log(response.data);
-        if (response1.length) {
-          if (response1[0].trim() === 'error') {
-            reject(response);
-          } else {
-            resolve(response);
-          }
-        }
-      })
-      .catch(function (error) {
-        reject(error);
-      });
-  });
+
+  if (!userid || !password) {
+    logger.warn('SMS service requested but credentials missing in config');
+    return { status: 'FAILURE', message: 'SMS credentials missing' };
+  }
+
+  try {
+    const response = await axios({
+      url: `http://enterprise.smsgupshup.com/GatewayAPI/rest?msg=${message}&v=${v}&userid=${userid}&password=${password}&method=${method}&send_to=${send_to}&msg_type=${msg_type}`,
+      method: 'GET',
+    });
+
+    let responseData = response.data.split('|');
+    if (responseData.length && responseData[0].trim() === 'error') {
+      logger.error('SMS Provider returned error', { error: response.data });
+      throw new Error(response.data);
+    }
+
+    logger.info('SMS sent successfully', { to: mobiles });
+    return response;
+  } catch (error) {
+    logger.error('SMS sending failed', { error: error.message, to: mobiles });
+    throw error;
+  }
 };
+
 module.exports = { sendSMS };

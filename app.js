@@ -4,23 +4,48 @@ const path = require('path');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+const compression = require('compression');
 
 dotenv.config();
 global.__basedir = __dirname;
 
-const postmanToOpenApi = require('postman-to-openapi');
-const YAML = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
 const listEndpoints = require('express-list-endpoints');
 const morgan = require('morgan');
 const passport = require('passport');
 const logger = require('./utils/logger');
 
-const { adminPassportStrategy, errorHandler } = require('./middleware');
+const {
+  adminPassportStrategy, errorHandler, apiVersion
+} = require('./middleware');
 const { devicePassportStrategy } = require('./middleware');
 const { clientPassportStrategy } = require('./middleware');
 
 const app = express();
+const requestLogger = require('./middleware/requestLogger');
+
+// Middleware: Request Tracing (MUST be first)
+app.use(requestLogger);
+
+// Middleware: API Versioning
+app.use(apiVersion);
+
+// Middleware: Prometheus Metrics
+const metricsMiddleware = require('./middleware/metricsMiddleware');
+app.use(metricsMiddleware);
+
+// Endpoint: Prometheus Metrics
+const { register } = require('./utils/metrics');
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
+// Performance: Compress responses
+app.use(compression());
 
 // Security: Helmet for security headers
 app.use(helmet({
@@ -34,6 +59,15 @@ app.use(helmet({
     },
   },
 }));
+
+// Security: Sanitize data (NoSQL Injection)
+app.use(mongoSanitize());
+
+// Security: Prevent XSS
+app.use(xss());
+
+// Security: Prevent HTTP Parameter Pollution
+app.use(hpp());
 
 // Security: Rate limiting
 const limiter = rateLimit({
@@ -81,16 +115,16 @@ app.use(routes);
 // Global error handler (must be after routes)
 app.use(errorHandler);
 
-// Swagger Documentation
-postmanToOpenApi('postman/postman-collection.json', path.join('postman/swagger.yml'), { defaultTag: 'General' })
-  .then(data => {
-    const result = YAML.load('postman/swagger.yml');
-    result.servers[0].url = '/';
-    app.use('/swagger', swaggerUi.serve, swaggerUi.setup(result));
-  })
-  .catch(e => {
-    console.error('Swagger generation failed:', e.message);
-  });
+// Code-First Swagger Documentation (Preferred)
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerConfig = require('./config/swagger');
+const swaggerSpecs = swaggerJsDoc(swaggerConfig);
+
+app.use('/api-docs', swaggerUi.serveFiles(swaggerSpecs), swaggerUi.setup(swaggerSpecs));
+app.get('/api-docs-json', (req, res) => res.json(swaggerSpecs));
+
+// Redirect /swagger to /api-docs for legacy support
+app.get('/swagger', (req, res) => res.redirect('/api-docs'));
 
 app.get('/', (req, res) => {
   res.render('index');
@@ -100,11 +134,23 @@ if (process.env.NODE_ENV !== 'test') {
   const seeder = require('./seeders');
   const allRegisterRoutes = listEndpoints(app);
   seeder(allRegisterRoutes).then(() => {
-    console.log('✅ Database seeding completed');
+    logger.info('✅ Database seeding completed');
   });
   app.listen(process.env.PORT, () => {
-    console.log(`🚀 Server running on port ${process.env.PORT}`);
+    logger.info(`🚀 Server running on port ${process.env.PORT}`);
   });
-} else {
-  module.exports = app;
 }
+
+// Global Exception/Rejection Handlers
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', { promise, reason: reason.message || reason });
+  // In production, you might want to exit and let PM2/K8s restart
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception thrown', { error: err.message, stack: err.stack });
+  // Always exit on uncaught exception to avoid inconsistent state
+  process.exit(1);
+});
+
+module.exports = app;
